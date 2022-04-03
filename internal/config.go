@@ -25,13 +25,13 @@ func save(filePath string, d Config) {
 	bytes, err := json.Marshal(d)
 
 	if err != nil {
-		panic(err)
+		Fatal(err)
 	}
 
 	err = ioutil.WriteFile(filePath, bytes, os.ModePerm)
 
 	if err != nil {
-		panic(err)
+		Fatal(err)
 	}
 }
 
@@ -59,7 +59,7 @@ func getOrCreateConfig() Config {
 	data, err := os.ReadFile(FilePath())
 
 	if err != nil {
-		println("No configuration found, setting up for first time use")
+		Info("No configuration file found, setting up for first time use")
 
 		config := Config{
 			Deployments: make(map[string]Deployment),
@@ -68,19 +68,19 @@ func getOrCreateConfig() Config {
 		data, err = json.MarshalIndent(config, "", "	")
 
 		if err != nil {
-			panic(err)
+			Fatal(err)
 		}
 
 		err = os.MkdirAll(path, os.ModeDir)
 
 		if err != nil {
-			panic(err)
+			Fatal(err)
 		}
 
 		err = ioutil.WriteFile(FilePath(), data, os.ModePerm)
 
 		if err != nil {
-			panic(err)
+			Fatal(err)
 		}
 
 	}
@@ -90,7 +90,7 @@ func getOrCreateConfig() Config {
 	err = json.Unmarshal(data, &d)
 
 	if err != nil {
-		panic(err)
+		Fatal(err)
 	}
 
 	return d

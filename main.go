@@ -13,7 +13,7 @@ var docker = getClientFunc()
 
 func main() {
 
-	println("Starting..")
+	internal.Info("Starting..")
 
 	internal.ReadConfig()
 
@@ -25,8 +25,10 @@ func main() {
 
 	println("Containers:")
 	for i, container := range ls {
-		fmt.Printf("%v, names: %s, status: %s, state: %s", i+1, container.Names, container.Status, container.State)
+		fmt.Println("%v, names: %s, status: %s, state: %s", i+1, container.Names, container.Status, container.State)
 	}
+
+	internal.ApiListenAndServe(8080)
 
 }
 
