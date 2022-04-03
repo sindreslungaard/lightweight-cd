@@ -1,4 +1,4 @@
-package main
+package internal
 
 import (
 	"encoding/json"
@@ -12,14 +12,8 @@ const fileName = "config.json"
 
 var mu sync.Mutex
 
-type Deployment struct {
-	UID   string            `json:"uid"`
-	Image string            `json:"image"`
-	Ports map[string]string `json:"ports"`
-	Env   map[string]string `json:"env"`
-}
-
 type Config struct {
+	Version     string                `json:"version"`
 	Deployments map[string]Deployment `json:"deployments"`
 }
 

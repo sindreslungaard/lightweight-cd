@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"lightweight-cd/internal"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/client"
@@ -14,7 +15,7 @@ func main() {
 
 	println("Starting..")
 
-	ReadConfig()
+	internal.ReadConfig()
 
 	ls, err := docker().ContainerList(context.Background(), types.ContainerListOptions{All: true})
 
@@ -24,7 +25,7 @@ func main() {
 
 	println("Containers:")
 	for i, container := range ls {
-		fmt.Printf("%v, %s", i+1, container.Names)
+		fmt.Printf("%v, names: %s, status: %s, state: %s", i+1, container.Names, container.Status, container.State)
 	}
 
 }
