@@ -62,6 +62,7 @@ func getOrCreateConfig() Config {
 		Info("No configuration file found, setting up for first time use")
 
 		config := Config{
+			Version:     "0.1",
 			Deployments: make(map[string]Deployment),
 		}
 
