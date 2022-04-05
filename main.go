@@ -6,10 +6,7 @@ import (
 	"lightweight-cd/internal"
 
 	"github.com/docker/docker/api/types"
-	"github.com/docker/docker/client"
 )
-
-var docker = getClientFunc()
 
 func main() {
 
@@ -17,7 +14,7 @@ func main() {
 
 	internal.ReadConfig()
 
-	ls, err := docker().ContainerList(context.Background(), types.ContainerListOptions{All: true})
+	ls, err := internal.Docker().ContainerList(context.Background(), types.ContainerListOptions{All: true})
 
 	if err != nil {
 		panic(err)
@@ -29,42 +26,5 @@ func main() {
 	}
 
 	internal.ApiListenAndServe(8080)
-
-}
-
-func getClientFunc() func() *client.Client {
-
-	var docker *client.Client
-
-	return func() *client.Client {
-
-		if docker != nil {
-
-			_, err := docker.Ping(context.Background())
-
-			// current client ok, use it
-			if err == nil {
-				return docker
-			}
-
-			// not ok, close and create new client
-			docker.Close()
-			docker = nil
-
-		}
-
-		cli, err := client.NewClientWithOpts(client.FromEnv)
-
-		if err != nil {
-			panic(err)
-		}
-
-		docker = cli
-
-		println("New docker client connection")
-
-		return docker
-
-	}
 
 }

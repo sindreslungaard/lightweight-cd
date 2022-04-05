@@ -5,15 +5,16 @@ import (
 	"time"
 
 	"github.com/docker/docker/api/types"
+	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/registry"
 	"github.com/docker/docker/client"
 )
 
 func RunContainerFromDeployment(client *client.Client, deployment Deployment) {
 
-	container, ok := IsDeploymentRunning(client, deployment.UID)
+	c, ok := IsDeploymentRunning(client, deployment.UID)
 
-	if ok && container.State == "running" {
+	if ok && c.State == "running" {
 		return
 	}
 
@@ -23,6 +24,25 @@ func RunContainerFromDeployment(client *client.Client, deployment Deployment) {
 
 	if err != nil {
 		Warn(err)
+	}
+
+	_, err = client.ImagePull(context.Background(), "docker.io/library/alpine", types.ImagePullOptions{})
+	if err != nil {
+		panic(err)
+	}
+
+	resp, err := client.ContainerCreate(context.Background(), &container.Config{
+		Image: "alpine",
+		Cmd:   []string{"echo", "hello world"},
+		Tty:   false,
+	}, nil, nil, nil, "")
+
+	if err != nil {
+		Fatal(err)
+	}
+
+	if err := client.ContainerStart(context.Background(), resp.ID, types.ContainerStartOptions{}); err != nil {
+		Fatal(err)
 	}
 
 }
@@ -35,10 +55,10 @@ func IsDeploymentRunning(client *client.Client, uid string) (*types.Container, b
 		ClientConnectionError(err)
 	}
 
-	for _, container := range containers {
-		for _, name := range container.Names {
+	for _, c := range containers {
+		for _, name := range c.Names {
 			if name == uid {
-				return &container, true
+				return &c, true
 			}
 		}
 	}
@@ -49,13 +69,13 @@ func IsDeploymentRunning(client *client.Client, uid string) (*types.Container, b
 
 func StopAndRemoveDeployment(client *client.Client, uid string, stopTimeout *time.Duration, forceRemove bool) error {
 
-	container, ok := IsDeploymentRunning(client, uid)
+	c, ok := IsDeploymentRunning(client, uid)
 
 	if !ok {
 		return nil
 	}
 
-	err := client.ContainerStop(context.Background(), container.ID, stopTimeout)
+	err := client.ContainerStop(context.Background(), c.ID, stopTimeout)
 
 	if err != nil {
 		return err
